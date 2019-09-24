@@ -143,7 +143,7 @@ spec:
         - --cert-dir=/opt/milpa/certs
         - --listen=/run/milpa/kiyot.sock
         - --milpa-endpoint=127.0.0.1:54555
-        - --service-cluster-ip-range=\$(SERVICE_CIDR)
+        - --service-cluster-ip-range=$(SERVICE_CIDR)
         - --kubeconfig=
         - --host-rootfs=/host-rootfs
         env:
