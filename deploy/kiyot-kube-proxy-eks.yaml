@@ -23,7 +23,7 @@ spec:
         command:
         - /bin/sh
         - -c
-        - kube-proxy --v=2 --config=/var/lib/kube-proxy-config/config --hostname-override=\$(NODE_NAME)
+        - kube-proxy --v=2 --config=/var/lib/kube-proxy-config/config --hostname-override=$(NODE_NAME)
         env:
         - name: NODE_NAME
           valueFrom:
