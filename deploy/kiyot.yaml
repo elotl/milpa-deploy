@@ -25,6 +25,8 @@ data:
       itzo:
         url: "${itzo_url}"
         version: "${itzo_version}"
+      extraCIDRs:
+      - "${pod_cidr}"
     license:
       key: "${license_key}"
       id: "${license_id}"
