@@ -55,6 +55,10 @@ if [ ! -x "$(command -v openssl)" ]; then
     exit 1
 fi
 
+if [ -z "$HOME" ] && [ -z "$RANDFILE" ]; then
+    export RANDFILE="/tmp/openssl.rand"
+fi
+
 csrName=${service}.${namespace}
 tmpdir=$(mktemp -d)
 echo "creating certs in tmpdir ${tmpdir} "
