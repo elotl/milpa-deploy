@@ -78,12 +78,12 @@ spec:
                       - amd64
       serviceAccountName: aws-node
       hostNetwork: true
+      imagePullSecrets: awsecr-cred
       tolerations:
         - operator: Exists
       containers:
         - image: 602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon-k8s-cni:v1.5.3
           imagePullPolicy: Always
-          imagePullSecrets: awsecr-cred
           ports:
             - containerPort: 61678
               name: metrics
