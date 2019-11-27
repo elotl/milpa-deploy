@@ -148,6 +148,7 @@ spec:
         - --service-cluster-ip-range=$(SERVICE_CIDR)
         - --kubeconfig=
         - --host-rootfs=/host-rootfs
+        - --server-url="${server_url}"
         env:
         - name: SERVICE_CIDR
           valueFrom:
