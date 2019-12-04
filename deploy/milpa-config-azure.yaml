@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: milpa-config
+  namespace: kube-system
+data:
+  SERVICE_CIDR: "${service_cidr}"
+  server.yml: |
+    apiVersion: v1
+    cloud:
+      azure:
+        location: "${location}"
+        subscriptionID: "${azure_subscription_id}"
+        tenantID: "${azure_tenant_id}"
+        clientID: "${azure_client_id}"
+        clientSecret: "${azure_client_secret}"
+    etcd:
+      internal:
+        dataDir: /opt/milpa/data
+    nodes:
+      defaultInstanceType: "${default_instance_type}"
+      defaultVolumeSize: "${default_volume_size}"
+      bootImageTags: ${boot_image_tags}
+      nametag: "${node_nametag}"
+      itzo:
+        url: "${itzo_url}"
+        version: "${itzo_version}"
+      extraCIDRs:
+      - "${pod_cidr}"
+    license:
+      key: "${license_key}"
+      id: "${license_id}"
+      username: "${license_username}"
+      password: "${license_password}"
