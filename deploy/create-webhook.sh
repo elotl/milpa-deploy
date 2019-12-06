@@ -164,6 +164,21 @@ spec:
     app: kiyot-webhook
 EOF
 )
+
+n=0
+while [[ $n -lt 300 ]]; do
+    found=0
+    for systempod in kube-apiserver kube-controller-manager kube-scheduler; do
+        kubectl get pods -n kube-system 2>/dev/null | tail -n+2 | awk '{print $2}' | grep "^$systempod" || break
+        found=$((found+1))
+    done
+    n=$((n+1))
+    if [[ $found -lt 3 ]]; then
+        sleep 1
+        continue
+    fi
+done
+
 if command -v envsubst >/dev/null 2>&1; then
     echo "$manifest" | envsubst | kubectl apply -f -
 else
