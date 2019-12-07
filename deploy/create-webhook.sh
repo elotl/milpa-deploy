@@ -177,6 +177,7 @@ while [[ $n -lt 300 ]]; do
         sleep 1
         continue
     fi
+    break
 done
 
 if command -v envsubst >/dev/null 2>&1; then
