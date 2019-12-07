@@ -169,7 +169,7 @@ n=0
 while [[ $n -lt 300 ]]; do
     found=0
     for systempod in kube-apiserver kube-controller-manager kube-scheduler; do
-        kubectl get pods -n kube-system 2>/dev/null | tail -n+2 | awk '{print $2}' | grep "^$systempod" || break
+        kubectl get pods -n kube-system 2>/dev/null | tail -n+2 | awk '{print $1}' | grep "^$systempod" || break
         found=$((found+1))
     done
     n=$((n+1))
