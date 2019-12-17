@@ -13,9 +13,13 @@ The following flags are required.
        --service          Service name of webhook.
        --namespace        Namespace where webhook service and secret reside.
        --secret           Secret name for CA certificate and server certificate/key pair.
+       --no-wait-for-control-plane
+                          Don't wait for control plane services.
 EOF
     exit 1
 }
+
+no_wait=false
 
 while [[ $# -gt 0 ]]; do
     case ${1} in
@@ -30,6 +34,9 @@ while [[ $# -gt 0 ]]; do
         --namespace)
             namespace="$2"
             shift
+            ;;
+        --no-wait-for-control-plane)
+            no_wait=true
             ;;
         *)
             usage
@@ -165,20 +172,24 @@ spec:
 EOF
 )
 
-n=0
-while [[ $n -lt 300 ]]; do
-    found=0
-    for systempod in kube-apiserver kube-controller-manager kube-scheduler; do
-        kubectl get pods -n kube-system 2>/dev/null | tail -n+2 | awk '{print $1}' | grep "^$systempod" || break
-        found=$((found+1))
+function wait_for_control_plane {
+    local n=0
+    while [[ $n -lt 300 ]]; do
+        local found=0
+        for systempod in kube-apiserver kube-controller-manager kube-scheduler; do
+            kubectl get pods -n kube-system 2>/dev/null | tail -n+2 | awk '{print $1}' | grep "^$systempod" || break
+            found=$((found+1))
+        done
+        n=$((n+1))
+        if [[ $found -lt 3 ]]; then
+            sleep 1
+            continue
+        fi
+        break
     done
-    n=$((n+1))
-    if [[ $found -lt 3 ]]; then
-        sleep 1
-        continue
-    fi
-    break
-done
+}
+
+$no_wait || wait_for_control_plane
 
 if command -v envsubst >/dev/null 2>&1; then
     echo "$manifest" | envsubst | kubectl apply -f -
