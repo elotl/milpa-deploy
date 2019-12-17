@@ -101,6 +101,69 @@ subjects:
   name: kiyot
   namespace: kube-system
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kiyot-network
+  namespace: kube-system
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kiyot-network
+  namespace: kube-system
+rules:
+  - apiGroups:
+    - ""
+    resources:
+      - namespaces
+      - pods
+      - services
+      - nodes
+      - endpoints
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+    - "networking.k8s.io"
+    resources:
+      - networkpolicies
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+    - extensions
+    resources:
+      - networkpolicies
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kiyot-network
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kiyot-network
+subjects:
+- kind: ServiceAccount
+  name: kiyot-network
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kiyot-network-token
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: kiyot-network
+type: kubernetes.io/service-account-token
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -148,6 +211,8 @@ spec:
         - --service-cluster-ip-range=$(SERVICE_CIDR)
         - --kubeconfig=
         - --host-rootfs=/host-rootfs
+        - --server-url=${server_url}
+        - --network-token-dir=/run/kiyot-network-token
         env:
         - name: SERVICE_CIDR
           valueFrom:
@@ -157,6 +222,9 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
+        - name: kiyot-network-token
+          mountPath: /run/kiyot-network-token
+          readOnly: true
         - name: optmilpa
           mountPath: /opt/milpa
         - name: run-milpa
@@ -192,6 +260,9 @@ spec:
           mountPath: /etc/machine-id
           readOnly: true
       volumes:
+      - name: kiyot-network-token
+        secret:
+          secretName: kiyot-network-token
       - name: optmilpa
         hostPath:
           path: /opt/milpa
