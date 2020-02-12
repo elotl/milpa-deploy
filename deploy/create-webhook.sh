@@ -52,7 +52,7 @@ done
 
 [ -z ${service} ] && service=kiyot-webhook-svc
 [ -z ${secret} ] && secret=kiyot-webhook-certs
-[ -z ${namespace} ] && namespace=kube-system
+[ -z ${namespace} ] && namespace=kube-system && export namespace
 [ -z ${valid_for_days} ] && valid_for_days=1825
 
 if [ ! -x "$(command -v openssl)" ]; then
@@ -111,7 +111,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kiyot-webhook
-  namespace: kube-system
+  namespace: ${namespace}
   labels:
     app: kiyot-webhook
 spec:
@@ -154,7 +154,7 @@ webhooks:
     clientConfig:
       service:
         name: kiyot-webhook-svc
-        namespace: kube-system
+        namespace: ${namespace}
         path: "/mutate"
       caBundle: "${CA_BUNDLE}"
     rules:
@@ -167,7 +167,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kiyot-webhook-svc
-  namespace: kube-system
+  namespace: ${namespace}
   labels:
     app: kiyot-webhook
 spec:
@@ -201,5 +201,5 @@ $no_wait || wait_for_control_plane
 if command -v envsubst >/dev/null 2>&1; then
     echo "$manifest" | envsubst | kubectl apply -f -
 else
-    echo "$manifest" | sed -e "s|\${CA_BUNDLE}|${CA_BUNDLE}|g" | kubectl apply -f -
+    echo "$manifest" | sed -e "s|\${CA_BUNDLE}|${CA_BUNDLE}|g" | sed -e "s|\${namespace}|${namespace}|g" | kubectl apply -f -
 fi
