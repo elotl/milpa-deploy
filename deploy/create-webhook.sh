@@ -212,4 +212,7 @@ else
     echo "$manifest" | sed -e "s|\${CA_BUNDLE}|${CA_BUNDLE}|g" | sed -e "s|\${namespace}|${namespace}|g" | kubectl apply -f -
 fi
 
+# Make sure any existing webhook pod is restarted.
+kubectl -n "$namespace" delete pod -l app=kiyot-webhook || true
+
 completed=true
