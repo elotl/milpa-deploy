@@ -64,12 +64,20 @@ if [ -z "$HOME" ] && [ -z "$RANDFILE" ]; then
     export RANDFILE="/tmp/openssl.rand"
 fi
 
+completed=false
 csrName=${service}.${namespace}
 tmpdir=$(mktemp -d)
 function cleanup {
+    echo "cleaning up ${tmpdir}"
     rm -rf ${tmpdir}
+    if $completed; then
+        echo "SUCCESS"
+    else
+        echo "FAILURE: script did not complete, please check output for errors"
+    fi
 }
 trap cleanup EXIT
+
 echo "creating certs in tmpdir ${tmpdir}"
 
 cat <<EOF >> ${tmpdir}/csr.conf
@@ -203,3 +211,5 @@ if command -v envsubst >/dev/null 2>&1; then
 else
     echo "$manifest" | sed -e "s|\${CA_BUNDLE}|${CA_BUNDLE}|g" | sed -e "s|\${namespace}|${namespace}|g" | kubectl apply -f -
 fi
+
+completed=true
